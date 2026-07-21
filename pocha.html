@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Anotador de Pocha</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 800px; }
+    
+    h1 { text-align: center; color: var(--accent); margin-bottom: 20px; font-weight: 700; font-size: 1.8rem; }
+    
+    .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    
+    /* Configuración Inicial */
+    .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
+    input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: var(--text); font-size: 1rem; }
+    
+    button { background: var(--accent); color: #000; font-weight: 600; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+    button:hover { background: var(--accent-hover); }
+    button.btn-danger { background: var(--danger); color: white; }
+    
+    .player-list { list-style: none; margin-bottom: 15px; }
+    .player-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #0f172a; border-radius: 6px; margin-bottom: 6px; }
+    
+    /* Panel de Control de Ronda */
+    .round-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .cards-badge { background: var(--accent); color: #000; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    
+    .grid-input { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 12px; padding: 10px; background: #0f172a; border-radius: 8px; }
+    .grid-input label { font-weight: 600; }
+    .grid-input input { width: 100%; text-align: center; }
+    
+    /* Tabla Resumen */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; }
+    th, td { padding: 10px 6px; border: 1px solid var(--border); }
+    th { background: #0f172a; color: var(--accent); }
+    .score-cell { font-weight: bold; }
+    
+    .hidden { display: none; }
+    .actions { display: flex; justify-content: space-between; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🎴 Marcador de Pocha</h1>
+
+  <!-- PANTALLA 1: Registro de Jugadores -->
+  <div id="setup-screen" class="card">
+    <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Jugadores</h2>
+    <div class="input-group">
+      <input type="text" id="player-name" placeholder="Nombre del jugador" onkeypress="if(event.key==='Enter') addPlayer()">
+      <button onclick="addPlayer()">Añadir</button>
+    </div>
+    <ul id="players-ul" class="player-list"></ul>
+    <button onclick="startGame()" style="width: 100%; margin-top: 10px;">Empezar Partida</button>
+  </div>
+
+  <!-- PANTALLA 2: Control de Partida -->
+  <div id="game-screen" class="card hidden">
+    <div class="round-header">
+      <h2>Ronda <span id="current-round-num">1</span> / <span id="total-rounds-num">0</span></h2>
+      <span class="cards-badge"><span id="current-cards-num">1</span> cartas</span>
+    </div>
+
+    <form id="round-form">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; margin-bottom: 8px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        <span>Jugador</span>
+        <span>Pide</span>
+        <span>Hace</span>
+      </div>
+      <div id="inputs-container"></div>
+      
+      <button type="button" onclick="submitRound()" style="width: 100%; margin-top: 15px;">Anotar Ronda</button>
+    </form>
+  </div>
+
+  <!-- PANTALLA 3: Clasificación y Tabla -->
+  <div id="table-screen" class="card hidden">
+    <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Puntuación Total</h2>
+    <div class="table-container">
+      <table id="scores-table">
+        <thead>
+          <tr id="table-header">
+            <th>Rnda (C)</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button class="btn-danger" onclick="resetGame()">Reiniciar Partida</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let players = [];
+  let roundsStructure = [];
+  let currentRoundIndex = 0;
+  let gameHistory = []; // Guarda pedidos, hechos y puntuaciones acumuladas
+
+  // Cargar si hay partida guardada
+  window.onload = () => {
+    const savedState = localStorage.getItem('pocha_state');
+    if (savedState) {
+      const data = JSON.parse(savedState);
+      players = data.players;
+      roundsStructure = data.roundsStructure;
+      currentRoundIndex = data.currentRoundIndex;
+      gameHistory = data.gameHistory;
+      
+      if (players.length > 0 && roundsStructure.length > 0) {
+        showGameUI();
+      }
+    }
+  };
+
+  function addPlayer() {
+    const input = document.getElementById('player-name');
+    const name = input.value.trim();
+    if (name !== "") {
+      players.push(name);
+      input.value = "";
+      renderPlayersList();
+    }
+  }
+
+  function removePlayer(index) {
+    players.splice(index, 1);
+    renderPlayersList();
+  }
+
+  function renderPlayersList() {
+    const ul = document.getElementById('players-ul');
+    ul.innerHTML = "";
+    players.forEach((p, idx) => {
+      ul.innerHTML += `<li class="player-item"><span>${p}</span><button class="btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="removePlayer(${idx})">X</button></li>`;
+    });
+  }
+
+  function generateRounds(numPlayers) {
+    let rounds = [];
+    // Subida: 1 a 5
+    for (let i = 1; i <= 5; i++) rounds.push(i);
+    // Altiplano: tantas rondas de 6 como jugadores
+    for (let i = 0; i < numPlayers; i++) rounds.push(6);
+    // Bajada: 5 a 1
+    for (let i = 5; i >= 1; i--) rounds.push(i);
+    return rounds;
+  }
+
+  function startGame() {
+    if (players.length < 2) {
+      alert("Añade al menos a 2 jugadores.");
+      return;
+    }
+    roundsStructure = generateRounds(players.length);
+    currentRoundIndex = 0;
+    gameHistory = [];
+    saveState();
+    showGameUI();
+  }
+
+  function showGameUI() {
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('table-screen').classList.remove('hidden');
+    
+    setupTableHeader();
+    renderCurrentRound();
+    renderTable();
+  }
+
+  function setupTableHeader() {
+    const tr = document.getElementById('table-header');
+    tr.innerHTML = '<th>Rnda (C)</th>';
+    players.forEach(p => {
+      tr.innerHTML += `<th>${p}</th>`;
+    });
+  }
+
+  function renderCurrentRound() {
+    if (currentRoundIndex >= roundsStructure.length) {
+      document.getElementById('game-screen').innerHTML = '<h2>🎉 ¡Fin de la partida!</h2>';
+      return;
+    }
+
+    const cards = roundsStructure[currentRoundIndex];
+    document.getElementById('current-round-num').innerText = currentRoundIndex + 1;
+    document.getElementById('total-rounds-num').innerText = roundsStructure.length;
+    document.getElementById('current-cards-num').innerText = cards;
+
+    const container = document.getElementById('inputs-container');
+    container.innerHTML = "";
+
+    players.forEach((p, idx) => {
+      container.innerHTML += `
+        <div class="grid-input">
+          <label>${p}</label>
+          <input type="number" id="pide-${idx}" min="0" max="${cards}" value="0">
+          <input type="number" id="hace-${idx}" min="0" max="${cards}" value="0">
+        </div>
+      `;
+    });
+  }
+
+  // FÓRMULA DE PUNTUACIÓN ESPECÍFICA
+  function calculateScore(asked, made) {
+    if (asked === made) {
+      // Si acierta: +10 si pidió 0, o (10 + 3 * bazas) si acertó más de 0
+      return 10 + (made * 3);
+    } else {
+      // Si falla: -3 por cada mano de diferencia (ya sea por exceso o defecto)
+      const diff = Math.abs(asked - made);
+      return -(diff * 3);
+    }
+  }
+
+  function submitRound() {
+    let roundData = { round: currentRoundIndex + 1, cards: roundsStructure[currentRoundIndex], results: [] };
+    
+    for (let i = 0; i < players.length; i++) {
+      const asked = parseInt(document.getElementById(`pide-${i}`).value) || 0;
+      const made = parseInt(document.getElementById(`hace-${i}`).value) || 0;
+      const pts = calculateScore(asked, made);
+      
+      // Calcular acumulado
+      const previousTotal = currentRoundIndex > 0 ? gameHistory[currentRoundIndex - 1].results[i].total : 0;
+      const newTotal = previousTotal + pts;
+
+      roundData.results.push({ asked, made, pts, total: newTotal });
+    }
+
+    gameHistory.push(roundData);
+    currentRoundIndex++;
+    
+    saveState();
+    renderCurrentRound();
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = "";
+
+    gameHistory.forEach(r => {
+      let rowHtml = `<tr><td>R${r.round} (${r.cards}c)</td>`;
+      r.results.forEach(res => {
+        const color = res.pts >= 0 ? 'var(--success)' : 'var(--danger)';
+        rowHtml += `
+          <td>
+            <div class="score-cell">${res.total}</div>
+            <div style="font-size:0.75rem; color: var(--text-muted);">${res.asked}/${res.made} (<span style="color:${color}">${res.pts >= 0 ? '+' : ''}${res.pts}</span>)</div>
+          </td>
+        `;
+      });
+      rowHtml += '</tr>';
+      tbody.innerHTML += rowHtml;
+    });
+  }
+
+  function saveState() {
+    const state = { players, roundsStructure, currentRoundIndex, gameHistory };
+    localStorage.setItem('pocha_state', JSON.stringify(state));
+  }
+
+  function resetGame() {
+    if (confirm("¿Seguro que quieres borrar la partida actual y empezar de nuevo?")) {
+      localStorage.removeItem('pocha_state');
+      location.reload();
+    }
+  }
+</script>
+</body>
+</html>
