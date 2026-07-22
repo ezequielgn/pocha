@@ -14,45 +14,68 @@
       --text-muted: #94a3b8;
       --border: #334155;
       --danger: #ef4444;
-      --success: #22c55e;
+      --warning: #facc15;
+      --success: #4ade80;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 15px; display: flex; justify-content: center; }
+    body { background-color: var(--bg); color: var(--text); padding: 12px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 800px; }
     
-    h1 { text-align: center; color: var(--accent); margin-bottom: 20px; font-weight: 700; font-size: 1.8rem; }
+    h1 { text-align: center; color: var(--accent); margin-bottom: 16px; font-weight: 700; font-size: 1.8rem; }
     
-    .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .card { background: var(--card-bg); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     
-    /* Configuración Inicial */
+    /* Registro de Jugadores */
     .input-group { display: flex; gap: 10px; margin-bottom: 12px; }
-    input[type="text"] { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: var(--text); font-size: 1rem; }
+    input[type="text"] { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; color: var(--text); font-size: 1.1rem; }
     
-    button { background: var(--accent); color: #000; font-weight: 600; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1rem; }
-    button:hover { background: var(--accent-hover); }
-    button.btn-danger { background: var(--danger); color: white; }
+    button { background: var(--accent); color: #000; font-weight: 700; border: none; padding: 12px 16px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+    button:hover { opacity: 0.9; }
+    
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-success { background: var(--success); color: #000; }
     
     .player-list { list-style: none; margin-bottom: 15px; }
-    .player-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #0f172a; border-radius: 6px; margin-bottom: 6px; }
+    .player-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 6px; font-size: 1.1rem; font-weight: 600; }
     
     /* Panel de Control de Ronda */
     .round-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-    .cards-badge { background: var(--accent); color: #000; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .cards-badge { background: var(--accent); color: #000; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 1.1rem; }
     
-    .grid-input { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: center; margin-bottom: 12px; padding: 10px; background: #0f172a; border-radius: 8px; }
-    .grid-input label { font-weight: 600; }
-    .grid-input input { width: 100%; text-align: center; }
+    /* FILA DE JUGADOR CON NÚMEROS GRANDES */
+    .grid-input { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; align-items: center; margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 10px; border: 1px solid var(--border); }
+    .grid-input label { font-weight: 700; font-size: 1.2rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
+    /* MEJORA ACCESIBILIDAD NÚMEROS GRANDES */
+    .num-input {
+      width: 100%;
+      height: 52px; /* Doble de alto */
+      font-size: 1.8rem !important; /* Número extra grande */
+      font-weight: 800;
+      text-align: center;
+      background: #1e293b;
+      color: #fff;
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      outline: none;
+    }
+
     /* Tabla Resumen */
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; }
-    th, td { padding: 10px 6px; border: 1px solid var(--border); }
-    th { background: #0f172a; color: var(--accent); }
-    .score-cell { font-weight: bold; }
+    .table-container { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; text-align: center; font-size: 1rem; }
+    th, td { padding: 12px 8px; border: 1px solid var(--border); }
+    th { background: #0f172a; color: var(--accent); font-size: 1.05rem; }
+    .score-cell { font-size: 1.3rem; font-weight: 800; }
     
     .hidden { display: none; }
-    .actions { display: flex; justify-content: space-between; margin-top: 15px; }
+    
+    /* Botones de acción inferiores */
+    .actions-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px; }
+    @media (min-width: 600px) {
+      .actions-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -62,13 +85,13 @@
 
   <!-- PANTALLA 1: Registro de Jugadores -->
   <div id="setup-screen" class="card">
-    <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Jugadores</h2>
+    <h2 style="margin-bottom: 15px; font-size: 1.3rem;">Jugadores</h2>
     <div class="input-group">
       <input type="text" id="player-name" placeholder="Nombre del jugador" onkeypress="if(event.key==='Enter') addPlayer()">
       <button onclick="addPlayer()">Añadir</button>
     </div>
     <ul id="players-ul" class="player-list"></ul>
-    <button onclick="startGame()" style="width: 100%; margin-top: 10px;">Empezar Partida</button>
+    <button onclick="startGame()" style="width: 100%; margin-top: 10px; height: 50px; font-size: 1.2rem;">Empezar Partida</button>
   </div>
 
   <!-- PANTALLA 2: Control de Partida -->
@@ -79,20 +102,20 @@
     </div>
 
     <form id="round-form">
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-weight: bold; margin-bottom: 8px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; font-weight: bold; margin-bottom: 8px; text-align: center; color: var(--text-muted); font-size: 1rem;">
         <span>Jugador</span>
         <span>Pide</span>
         <span>Hace</span>
       </div>
       <div id="inputs-container"></div>
       
-      <button type="button" onclick="submitRound()" style="width: 100%; margin-top: 15px;">Anotar Ronda</button>
+      <button type="button" onclick="submitRound()" style="width: 100%; margin-top: 15px; height: 54px; font-size: 1.2rem;">Anotar Ronda</button>
     </form>
   </div>
 
   <!-- PANTALLA 3: Clasificación y Tabla -->
   <div id="table-screen" class="card hidden">
-    <h2 style="margin-bottom: 15px; font-size: 1.2rem;">Puntuación Total</h2>
+    <h2 style="margin-bottom: 15px; font-size: 1.3rem;">Puntuación Total</h2>
     <div class="table-container">
       <table id="scores-table">
         <thead>
@@ -103,8 +126,12 @@
         <tbody id="table-body"></tbody>
       </table>
     </div>
-    <div class="actions">
-      <button class="btn-danger" onclick="resetGame()">Reiniciar Partida</button>
+
+    <!-- BOTONES DE ACCIÓN DE COLORES -->
+    <div class="actions-grid">
+      <button class="btn-warning" onclick="undoLastRound()">↩️ Deshacer Ronda</button>
+      <button class="btn-success" onclick="exportSummary()">📊 Exportar Resumen</button>
+      <button class="btn-danger" onclick="resetGame()">🗑️ Reiniciar Partida</button>
     </div>
   </div>
 </div>
@@ -113,9 +140,8 @@
   let players = [];
   let roundsStructure = [];
   let currentRoundIndex = 0;
-  let gameHistory = []; // Guarda pedidos, hechos y puntuaciones acumuladas
+  let gameHistory = [];
 
-  // Cargar si hay partida guardada
   window.onload = () => {
     const savedState = localStorage.getItem('pocha_state');
     if (savedState) {
@@ -150,17 +176,14 @@
     const ul = document.getElementById('players-ul');
     ul.innerHTML = "";
     players.forEach((p, idx) => {
-      ul.innerHTML += `<li class="player-item"><span>${p}</span><button class="btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="removePlayer(${idx})">X</button></li>`;
+      ul.innerHTML += `<li class="player-item"><span>${p}</span><button class="btn-danger" style="padding: 6px 12px; font-size: 0.9rem;" onclick="removePlayer(${idx})">X</button></li>`;
     });
   }
 
   function generateRounds(numPlayers) {
     let rounds = [];
-    // Subida: 1 a 5
     for (let i = 1; i <= 5; i++) rounds.push(i);
-    // Altiplano: tantas rondas de 6 como jugadores
     for (let i = 0; i < numPlayers; i++) rounds.push(6);
-    // Bajada: 5 a 1
     for (let i = 5; i >= 1; i--) rounds.push(i);
     return rounds;
   }
@@ -197,7 +220,7 @@
 
   function renderCurrentRound() {
     if (currentRoundIndex >= roundsStructure.length) {
-      document.getElementById('game-screen').innerHTML = '<h2>🎉 ¡Fin de la partida!</h2>';
+      document.getElementById('game-screen').innerHTML = '<h2 style="text-align:center; padding: 20px;">🎉 ¡Fin de la partida!</h2>';
       return;
     }
 
@@ -213,20 +236,17 @@
       container.innerHTML += `
         <div class="grid-input">
           <label>${p}</label>
-          <input type="number" id="pide-${idx}" min="0" max="${cards}" value="0">
-          <input type="number" id="hace-${idx}" min="0" max="${cards}" value="0">
+          <input type="number" class="num-input" id="pide-${idx}" min="0" max="${cards}" value="0">
+          <input type="number" class="num-input" id="hace-${idx}" min="0" max="${cards}" value="0">
         </div>
       `;
     });
   }
 
-  // FÓRMULA DE PUNTUACIÓN ESPECÍFICA
   function calculateScore(asked, made) {
     if (asked === made) {
-      // Si acierta: +10 si pidió 0, o (10 + 3 * bazas) si acertó más de 0
       return 10 + (made * 3);
     } else {
-      // Si falla: -3 por cada mano de diferencia (ya sea por exceso o defecto)
       const diff = Math.abs(asked - made);
       return -(diff * 3);
     }
@@ -240,7 +260,6 @@
       const made = parseInt(document.getElementById(`hace-${i}`).value) || 0;
       const pts = calculateScore(asked, made);
       
-      // Calcular acumulado
       const previousTotal = currentRoundIndex > 0 ? gameHistory[currentRoundIndex - 1].results[i].total : 0;
       const newTotal = previousTotal + pts;
 
@@ -255,24 +274,67 @@
     renderTable();
   }
 
+  /* MOSTRAR ÚLTIMA RONDA ARRIBA DEL TODO */
   function renderTable() {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = "";
 
-    gameHistory.forEach(r => {
-      let rowHtml = `<tr><td>R${r.round} (${r.cards}c)</td>`;
+    // Invertimos la lista para que la última ronda aparezca primera
+    const reversedHistory = [...gameHistory].reverse();
+
+    reversedHistory.forEach(r => {
+      let rowHtml = `<tr><td><strong>R${r.round}</strong> (${r.cards}c)</td>`;
       r.results.forEach(res => {
         const color = res.pts >= 0 ? 'var(--success)' : 'var(--danger)';
         rowHtml += `
           <td>
             <div class="score-cell">${res.total}</div>
-            <div style="font-size:0.75rem; color: var(--text-muted);">${res.asked}/${res.made} (<span style="color:${color}">${res.pts >= 0 ? '+' : ''}${res.pts}</span>)</div>
+            <div style="font-size:0.85rem; color: var(--text-muted);">${res.asked}/${res.made} (<span style="color:${color}">${res.pts >= 0 ? '+' : ''}${res.pts}</span>)</div>
           </td>
         `;
       });
       rowHtml += '</tr>';
       tbody.innerHTML += rowHtml;
     });
+  }
+
+  /* FUNCIÓN DESHACER ÚLTIMA RONDA */
+  function undoLastRound() {
+    if (gameHistory.length === 0) {
+      alert("No hay rondas para deshacer.");
+      return;
+    }
+    if (confirm("¿Quieres eliminar la última ronda anotada y volver atrás?")) {
+      gameHistory.pop();
+      currentRoundIndex--;
+      saveState();
+      renderCurrentRound();
+      renderTable();
+    }
+  }
+
+  /* FUNCIÓN EXPORTAR RESUMEN (TEXTO/WHATSAPP) */
+  function exportSummary() {
+    if (gameHistory.length === 0) {
+      alert("Aún no hay puntos registrados.");
+      return;
+    }
+    const lastRound = gameHistory[gameHistory.length - 1];
+    let summaryText = `🎴 *Resumen de la Pocha (Ronda ${lastRound.round})*\n\n`;
+    
+    players.forEach((p, idx) => {
+      const total = lastRound.results[idx].total;
+      summaryText += `• *${p}*: ${total} pts\n`;
+    });
+    
+    summaryText += `\n_Generado con Marcador de Pocha_`;
+
+    if (navigator.share) {
+      navigator.share({ title: 'Marcador de Pocha', text: summaryText });
+    } else {
+      navigator.clipboard.writeText(summaryText);
+      alert("¡Clasificación copiada al portapapeles! Ya puedes pegarla en WhatsApp o Mensajes.");
+    }
   }
 
   function saveState() {
